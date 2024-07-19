@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package miapi;
+
+option go_package = "miapi/proto";
+
+service ExampleService {
+    rpc GetExample (ExampleRequest) returns (ExampleResponse);
+    rpc GetAllProducts (Empty) returns (stream Product);
+    rpc SearchProducts (SearchRequest) returns (stream Product) {}
+
+}
+
+message ExampleRequest {
+    string name = 1;
+}
+
+message ExampleResponse {
+    string message = 1;
+}
+
+message Empty {}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+}
+
+message SearchRequest {
+    string name = 1;
+  }
