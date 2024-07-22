@@ -32,6 +32,21 @@ func (s *server) GetExample(ctx context.Context, req *pb.ExampleRequest) (*pb.Ex
 	return &pb.ExampleResponse{Message: "Hello " + req.Name}, nil
 }
 
+func (s *server) GetProduct(ctx context.Context, req *pb.ProductRequest) (*pb.Product, error) {
+	var product model.Product
+	result := s.db.First(&product, "id = ?", req.Id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &pb.Product{
+		Id:          product.ID.String(),
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+	}, nil
+}
+
 func (s *server) GetAllProducts(req *pb.Empty, stream pb.ExampleService_GetAllProductsServer) error {
 	ctx := stream.Context()
 	omitCache := metautils.ExtractIncoming(ctx).Get("X-Omit-Cache")

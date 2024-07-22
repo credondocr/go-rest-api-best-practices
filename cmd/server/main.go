@@ -2,12 +2,14 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/graphql-go/handler"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "github.com/credondocr/go-rest-api-best-practices/internal/docs"
+	"github.com/credondocr/go-rest-api-best-practices/internal/graphql"
 	"github.com/credondocr/go-rest-api-best-practices/internal/router"
 	"github.com/credondocr/go-rest-api-best-practices/internal/service"
 	"github.com/credondocr/go-rest-api-best-practices/pkg/config"
@@ -40,6 +42,15 @@ func main() {
 		httpRequestsTotal.WithLabelValues(path).Inc()
 		c.Next()
 	})
+
+	// Configurar servidor GraphQL
+	graphqlHandler := handler.New(&handler.Config{
+		Schema:   &graphql.Schema,
+		Pretty:   true,
+		GraphiQL: true,
+	})
+	r.POST("/graphql", gin.WrapH(graphqlHandler))
+	r.GET("/graphql", gin.WrapH(graphqlHandler))
 
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 

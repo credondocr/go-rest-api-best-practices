@@ -22,6 +22,7 @@ const (
 	ExampleService_GetExample_FullMethodName     = "/miapi.ExampleService/GetExample"
 	ExampleService_GetAllProducts_FullMethodName = "/miapi.ExampleService/GetAllProducts"
 	ExampleService_SearchProducts_FullMethodName = "/miapi.ExampleService/SearchProducts"
+	ExampleService_GetProduct_FullMethodName     = "/miapi.ExampleService/GetProduct"
 )
 
 // ExampleServiceClient is the client API for ExampleService service.
@@ -31,6 +32,7 @@ type ExampleServiceClient interface {
 	GetExample(ctx context.Context, in *ExampleRequest, opts ...grpc.CallOption) (*ExampleResponse, error)
 	GetAllProducts(ctx context.Context, in *Empty, opts ...grpc.CallOption) (ExampleService_GetAllProductsClient, error)
 	SearchProducts(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (ExampleService_SearchProductsClient, error)
+	GetProduct(ctx context.Context, in *ProductRequest, opts ...grpc.CallOption) (*Product, error)
 }
 
 type exampleServiceClient struct {
@@ -117,6 +119,16 @@ func (x *exampleServiceSearchProductsClient) Recv() (*Product, error) {
 	return m, nil
 }
 
+func (c *exampleServiceClient) GetProduct(ctx context.Context, in *ProductRequest, opts ...grpc.CallOption) (*Product, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Product)
+	err := c.cc.Invoke(ctx, ExampleService_GetProduct_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExampleServiceServer is the server API for ExampleService service.
 // All implementations must embed UnimplementedExampleServiceServer
 // for forward compatibility
@@ -124,6 +136,7 @@ type ExampleServiceServer interface {
 	GetExample(context.Context, *ExampleRequest) (*ExampleResponse, error)
 	GetAllProducts(*Empty, ExampleService_GetAllProductsServer) error
 	SearchProducts(*SearchRequest, ExampleService_SearchProductsServer) error
+	GetProduct(context.Context, *ProductRequest) (*Product, error)
 	mustEmbedUnimplementedExampleServiceServer()
 }
 
@@ -139,6 +152,9 @@ func (UnimplementedExampleServiceServer) GetAllProducts(*Empty, ExampleService_G
 }
 func (UnimplementedExampleServiceServer) SearchProducts(*SearchRequest, ExampleService_SearchProductsServer) error {
 	return status.Errorf(codes.Unimplemented, "method SearchProducts not implemented")
+}
+func (UnimplementedExampleServiceServer) GetProduct(context.Context, *ProductRequest) (*Product, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
 }
 func (UnimplementedExampleServiceServer) mustEmbedUnimplementedExampleServiceServer() {}
 
@@ -213,6 +229,24 @@ func (x *exampleServiceSearchProductsServer) Send(m *Product) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _ExampleService_GetProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProductRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExampleServiceServer).GetProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExampleService_GetProduct_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExampleServiceServer).GetProduct(ctx, req.(*ProductRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExampleService_ServiceDesc is the grpc.ServiceDesc for ExampleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -223,6 +257,10 @@ var ExampleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetExample",
 			Handler:    _ExampleService_GetExample_Handler,
+		},
+		{
+			MethodName: "GetProduct",
+			Handler:    _ExampleService_GetProduct_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

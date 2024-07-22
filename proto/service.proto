@@ -8,7 +8,7 @@ service ExampleService {
     rpc GetExample (ExampleRequest) returns (ExampleResponse);
     rpc GetAllProducts (Empty) returns (stream Product);
     rpc SearchProducts (SearchRequest) returns (stream Product) {}
-
+    rpc GetProduct(ProductRequest) returns (Product);  
 }
 
 message ExampleRequest {
@@ -30,4 +30,8 @@ message Product {
 
 message SearchRequest {
     string name = 1;
-  }
+}
+
+message ProductRequest {  // Nuevo mensaje
+    string id = 1;
+}
